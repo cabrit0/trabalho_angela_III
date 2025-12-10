@@ -18,7 +18,7 @@ const shuffleOptions = (options) => {
 };
 
 const Act2 = () => {
-    const { reduceScore, addLeakedData, setCurrentStage, deviceData } = useGame();
+    const { reduceScore, addLeakedData, setCurrentStage, deviceData, trackAnswer } = useGame();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [feedback, setFeedback] = useState(null);
     const [downloadProgress, setDownloadProgress] = useState(0);
@@ -28,7 +28,6 @@ const Act2 = () => {
     const questions = useMemo(() => getRandomQuestions(SCENARIO_DATA.act2, QUESTIONS_PER_ACT), []);
     const currentQ = questions[currentQuestionIndex];
 
-    // Shuffle options for current question
     const shuffledOptions = useMemo(() =>
         currentQ ? shuffleOptions(currentQ.options) : [],
         [currentQ]
@@ -36,6 +35,8 @@ const Act2 = () => {
 
     const handleAnswer = (option) => {
         const isSafe = option.risk === currentQ.correctRisk;
+
+        trackAnswer(currentQ.type, isSafe, option.risk);
 
         if (isSafe) {
             play('success');

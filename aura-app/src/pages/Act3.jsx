@@ -18,7 +18,7 @@ const shuffleOptions = (options) => {
 };
 
 const Act3 = () => {
-    const { reduceScore, addLeakedData, setCurrentStage, deviceData } = useGame();
+    const { reduceScore, addLeakedData, setCurrentStage, deviceData, trackAnswer } = useGame();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [feedback, setFeedback] = useState(null);
     const [showGPS, setShowGPS] = useState(false);
@@ -28,13 +28,11 @@ const Act3 = () => {
     const questions = useMemo(() => getRandomQuestions(SCENARIO_DATA.act3, QUESTIONS_PER_ACT), []);
     const currentQ = questions[currentQuestionIndex];
 
-    // Shuffle options for current question
     const shuffledOptions = useMemo(() =>
         currentQ ? shuffleOptions(currentQ.options) : [],
         [currentQ]
     );
 
-    // Trigger GPS tracker after 2 seconds
     useEffect(() => {
         const timer = setTimeout(() => setShowGPS(true), 2000);
         return () => clearTimeout(timer);
@@ -42,6 +40,8 @@ const Act3 = () => {
 
     const handleAnswer = (option) => {
         const isSafe = option.risk === currentQ.correctRisk;
+
+        trackAnswer(currentQ.type, isSafe, option.risk);
 
         if (isSafe) {
             play('success');

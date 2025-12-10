@@ -18,7 +18,7 @@ const shuffleOptions = (options) => {
 };
 
 const Act1 = () => {
-    const { reduceScore, addLeakedData, setCurrentStage, deviceData } = useGame();
+    const { reduceScore, addLeakedData, setCurrentStage, deviceData, trackAnswer } = useGame();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [feedback, setFeedback] = useState(null);
     const [showDataLeak, setShowDataLeak] = useState(false);
@@ -37,6 +37,9 @@ const Act1 = () => {
     const handleAnswer = (option) => {
         const isSafe = option.risk === currentQ.correctRisk;
 
+        // Track for profiling
+        trackAnswer(currentQ.type, isSafe, option.risk);
+
         if (isSafe) {
             play('success');
             setFeedback({ type: 'success', message: currentQ.feedback.safe });
@@ -44,7 +47,6 @@ const Act1 = () => {
             play('error');
             reduceScore(10);
 
-            // Add leaked data with more impact
             const leakType = option.risk === 'high' ? 'CRITICAL' : 'WARNING';
             addLeakedData({
                 label: `[${leakType}] ${currentQ.type.toUpperCase()}`,

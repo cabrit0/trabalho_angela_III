@@ -27,7 +27,7 @@ const calculateStrength = (password) => {
 };
 
 const Register = () => {
-    const { setCurrentStage, addLeakedData, deviceData } = useGame();
+    const { setCurrentStage, addLeakedData, deviceData, setUserData } = useGame();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -39,6 +39,10 @@ const Register = () => {
         if (!username.trim()) return;
 
         setIsLoading(true);
+
+        // Store user data in context for later scare display
+        setUserData({ username, password });
+
         addLeakedData({ label: 'Username Registado', value: username });
         addLeakedData({ label: 'Força da Password', value: strength.label });
         addLeakedData({ label: 'Sistema Operativo', value: deviceData.os });

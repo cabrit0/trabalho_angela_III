@@ -2,113 +2,144 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useGame } from '../context/GameContext';
 import GlitchText from '../components/effects/GlitchText';
+import IdentityScan from '../components/effects/IdentityScan';
 
 const Report = () => {
-    const { leakedData, securityScore, deviceData, resetGame } = useGame();
+    const {
+        leakedData, securityScore, deviceData, resetGame,
+        getDominantProfile, getRiskPercentage, getDarkWebValue,
+        userData, getMaskedPassword
+    } = useGame();
+    const [showScan, setShowScan] = useState(true);
     const [showDebrief, setShowDebrief] = useState(false);
-    const [btcValue, setBtcValue] = useState(0);
 
-    useEffect(() => {
-        setBtcValue((leakedData.length * 0.005).toFixed(4));
-    }, [leakedData]);
+    const profile = getDominantProfile();
+    const riskPercent = getRiskPercentage();
+    const darkWebValue = getDarkWebValue();
+    const maskedPw = getMaskedPassword();
+
+    if (showScan) {
+        return <IdentityScan onComplete={() => setShowScan(false)} />;
+    }
 
     if (showDebrief) {
-        // --- DEBRIEFING (CLEAN UI) - Compact to fit screen ---
         return (
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="fixed inset-0 z-50 bg-white text-slate-800 p-4 flex flex-col"
+                className="fixed inset-0 z-50 bg-white text-slate-800 overflow-y-auto"
             >
-                <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full">
-                    <header className="border-b border-slate-200 pb-2 text-center shrink-0">
-                        <h1 className="text-2xl font-bold text-blue-600">SIMULAÇÃO TERMINADA</h1>
-                        <p className="text-sm text-slate-500">Módulo de Cibersegurança: Diagnóstico Final</p>
-                    </header>
+                <div className="min-h-full p-4 flex flex-col">
+                    <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col">
+                        <header className="border-b border-slate-200 pb-2 text-center">
+                            <h1 className="text-xl font-bold text-blue-600">SIMULAÇÃO TERMINADA</h1>
+                        </header>
 
-                    <section className="bg-blue-50 p-3 my-3 border border-blue-100 shrink-0">
-                        <h2 className="text-lg font-bold text-blue-800">Não entres em pânico.</h2>
-                        <p className="text-sm">Isto foi apenas uma simulação ("AURA"). Nenhum dado teu foi realmente roubado ou vendido.</p>
-                    </section>
+                        <section className="bg-blue-50 p-3 my-3 border border-blue-100">
+                            <h2 className="text-base font-bold text-blue-800">🎉 Não entres em pânico!</h2>
+                            <p className="text-sm">Isto foi uma simulação. <strong>NENHUM dado foi roubado.</strong></p>
+                        </section>
 
-                    <section className="flex-1 min-h-0 flex flex-col">
-                        <div className="flex justify-between items-center text-sm p-2 bg-slate-100 rounded shrink-0">
-                            <span>Pontuação de Segurança:</span>
-                            <span className={`font-bold ${securityScore > 70 ? 'text-green-600' : 'text-red-600'}`}>
-                                {securityScore}/100
-                            </span>
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                            <div className="bg-slate-100 p-2 rounded text-center">
+                                <span className="text-xs text-slate-500">Pontuação</span>
+                                <span className={`block text-lg font-bold ${securityScore > 70 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {securityScore}/100
+                                </span>
+                            </div>
+                            <div className="bg-slate-100 p-2 rounded text-center">
+                                <span className="text-xs text-slate-500">Perfil</span>
+                                <span className="block text-lg font-bold">{profile.emoji} {profile.name}</span>
+                            </div>
                         </div>
 
                         {leakedData.length > 0 && (
-                            <div className="mt-2 flex-1 min-h-0 flex flex-col">
-                                <h4 className="font-bold text-sm text-red-600 mb-1 shrink-0">Erros Identificados:</h4>
-                                <div className="flex-1 overflow-y-auto border border-slate-200 rounded p-2 bg-slate-50">
-                                    <ul className="space-y-1 text-xs text-slate-600">
-                                        {leakedData.map((data, idx) => (
-                                            <li key={idx} className="flex gap-2">
-                                                <span className="font-mono bg-slate-200 px-1 rounded shrink-0">{data.label}</span>
-                                                <span className="truncate">{data.value}</span>
+                            <div className="flex-1 min-h-0 mb-3">
+                                <h4 className="font-bold text-xs text-red-600 mb-1">Erros ({leakedData.length}):</h4>
+                                <div className="h-32 overflow-y-auto border border-slate-200 rounded p-2 bg-slate-50">
+                                    <ul className="space-y-0.5 text-xs text-slate-600">
+                                        {leakedData.slice(0, 15).map((data, idx) => (
+                                            <li key={idx} className="truncate">
+                                                <span className="font-mono bg-red-100 text-red-700 px-1 rounded mr-1">{data.label}</span>
+                                                {data.value}
                                             </li>
                                         ))}
+                                        {leakedData.length > 15 && (
+                                            <li className="text-slate-400">+ {leakedData.length - 15} mais...</li>
+                                        )}
                                     </ul>
                                 </div>
                             </div>
                         )}
-                    </section>
 
-                    <div className="text-center pt-3 shrink-0">
-                        <button
-                            onClick={resetGame}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow transition-transform hover:scale-105"
-                        >
-                            REINICIAR SISTEMA
-                        </button>
+                        <div className="text-center py-3">
+                            <button
+                                onClick={resetGame}
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow"
+                            >
+                                TENTAR NOVAMENTE
+                            </button>
+                        </div>
                     </div>
                 </div>
             </motion.div>
         );
     }
 
-    // --- VICTIM REPORT (SCARY UI) - Compact ---
     return (
-        <div className="h-full flex flex-col items-center justify-center p-4">
+        <div className="h-full flex flex-col items-center justify-center p-4 overflow-y-auto">
             <motion.div
-                className="text-center space-y-4 w-full max-w-md"
+                className="text-center space-y-3 w-full max-w-md"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
             >
-                <h1 className="text-4xl font-black text-alert-red">
+                <h1 className="text-3xl font-black text-alert-red">
                     <GlitchText text="IDENTITY SOLD" intense={true} />
                 </h1>
 
-                <div className="bg-deep-black border border-alert-red/50 p-4 font-mono text-left space-y-2 text-sm">
-                    <div className="flex justify-between border-b border-alert-red/30 pb-1">
-                        <span className="text-gray-400">ITEM_ID:</span>
-                        <span className="text-neon-green">#{Math.floor(Math.random() * 99999)}</span>
-                    </div>
-                    <div className="flex justify-between border-b border-alert-red/30 pb-1">
-                        <span className="text-gray-400">DATA_POINTS:</span>
-                        <span className="text-white">{leakedData.length} RECORDS</span>
-                    </div>
-                    <div className="flex justify-between border-b border-alert-red/30 pb-1">
-                        <span className="text-gray-400">DEVICE:</span>
-                        <span className="text-cyber-blue">{deviceData.os}</span>
-                    </div>
-                    <div className="py-2 text-center">
-                        <div className="text-xs text-alert-red">MARKET VALUE</div>
-                        <div className="text-3xl font-bold text-white">{btcValue} BTC</div>
+                {/* Profile Card */}
+                <div className={`border-2 ${profile.color?.replace('text-', 'border-') || 'border-alert-red'} bg-deep-black p-3`}>
+                    <div className="text-3xl">{profile.emoji}</div>
+                    <h2 className={`text-lg font-black ${profile.color || 'text-alert-red'}`}>{profile.name}</h2>
+                    <p className="text-white/60 text-xs">{profile.description}</p>
+                </div>
+
+                {/* Scary User Data */}
+                <div className="bg-alert-red/20 border border-alert-red p-3 font-mono text-xs text-left">
+                    <div className="text-alert-red font-bold mb-1">⚠️ DADOS CAPTURADOS:</div>
+                    <div className="space-y-1 text-white">
+                        <p>USERNAME: <span className="text-alert-red">{userData.username || 'N/A'}</span></p>
+                        <p>PASSWORD: <span className="text-alert-red">{maskedPw}</span></p>
+                        <p>IP: <span className="text-neon-green">{deviceData.ip}</span></p>
+                        <p>LOCALIZAÇÃO: <span className="text-neon-green">{deviceData.timezone}</span></p>
                     </div>
                 </div>
 
-                <p className="text-red-500 text-xs animate-pulse">
-                    TRANSFERRING ASSETS TO DARK_NET_WALLET...
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-2 font-mono text-xs">
+                    <div className="bg-deep-black border border-white/20 p-2">
+                        <div className="text-white/50">DATA</div>
+                        <div className="text-white font-bold">{leakedData.length}</div>
+                    </div>
+                    <div className="bg-deep-black border border-alert-red p-2">
+                        <div className="text-alert-red/50">RISCO</div>
+                        <div className="text-alert-red font-bold">{riskPercent}%</div>
+                    </div>
+                    <div className="bg-deep-black border border-cyber-blue p-2">
+                        <div className="text-cyber-blue/50">VALOR</div>
+                        <div className="text-cyber-blue font-bold">{darkWebValue} BTC</div>
+                    </div>
+                </div>
+
+                <p className="text-alert-red text-xs animate-pulse">
+                    TRANSACTION COMPLETE...
                 </p>
 
                 <button
                     onClick={() => setShowDebrief(true)}
-                    className="border border-neon-green text-neon-green hover:bg-neon-green hover:text-deep-black py-2 px-6 font-bold transition-all"
+                    className="border border-neon-green text-neon-green hover:bg-neon-green hover:text-deep-black py-2 px-4 font-bold transition-all w-full text-sm"
                 >
-                    VER RELATÓRIO COMPLETO
+                    VER RELATÓRIO
                 </button>
             </motion.div>
         </div>
