@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neon-green: #00ff41;
+  --color-alert-red: #ff0055;
+  --color-deep-black: #050505;
+  --color-cyber-blue: #00f3ff;
+  --color-void-black: #000000;
+
+  --font-mono: "Fira Code", monospace;
+
+  --animate-glitch: glitch 1s linear infinite;
+
+  @keyframes glitch {
+
+    2%,
+    64% {
+      transform: translate(2px, 0) skew(0deg);
+    }
+
+    4%,
+    60% {
+      transform: translate(-2px, 0) skew(0deg);
+    }
+
+    62% {
+      transform: translate(0, 0) skew(5deg);
+    }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-deep-black text-neon-green font-mono overflow-hidden selection:bg-neon-green selection:text-deep-black;
+  }
+}
