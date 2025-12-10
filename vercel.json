@@ -1,0 +1,13 @@
+{
+    "version": 2,
+    "buildCommand": "cd aura-app && npm install && npm run build",
+    "outputDirectory": "aura-app/dist",
+    "installCommand": "echo 'Skipping root install'",
+    "framework": null,
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/"
+        }
+    ]
+}
