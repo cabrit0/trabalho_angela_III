@@ -50,7 +50,7 @@ const MainLayout = ({ children }) => {
     };
 
     return (
-        <div className="relative min-h-screen w-full bg-deep-black text-neon-green font-mono overflow-hidden selection:bg-neon-green selection:text-deep-black">
+        <div className="relative min-h-[100dvh] w-full bg-deep-black text-neon-green font-mono overflow-x-hidden selection:bg-neon-green selection:text-deep-black safe-area-top safe-area-bottom">
             {/* Background Noise/Texture */}
             <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none mix-blend-overlay" />
 

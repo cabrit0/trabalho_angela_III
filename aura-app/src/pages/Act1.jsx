@@ -73,7 +73,7 @@ const Act1 = () => {
     if (!currentQ) return <div className="p-10 text-center">A carregar perguntas...</div>;
 
     return (
-        <div className="h-full flex flex-col max-w-3xl mx-auto pt-6 relative">
+        <div className="h-full flex flex-col max-w-3xl mx-auto px-2 sm:px-0 pt-4 sm:pt-6 relative pb-4">
             {/* Data Leak Overlay - Shows on errors */}
             <AnimatePresence>
                 {showDataLeak && (
@@ -87,7 +87,7 @@ const Act1 = () => {
                             <motion.div
                                 animate={{ scale: [1, 1.1, 1] }}
                                 transition={{ repeat: Infinity, duration: 0.3 }}
-                                className="text-6xl md:text-8xl font-black text-alert-red"
+                                className="text-4xl sm:text-6xl md:text-8xl font-black text-alert-red"
                             >
                                 ⚠️ DATA LEAK
                             </motion.div>
@@ -104,8 +104,8 @@ const Act1 = () => {
             {/* Header */}
             <div className="mb-6 border-b border-neon-green/30 pb-4 flex justify-between items-end">
                 <div>
-                    <h2 className="text-xl font-bold text-neon-green/50">ACT I: SOCIAL ENGINEERING</h2>
-                    <p className="text-sm text-cyber-blue">PHISHING DETECTION PROTOCOLS</p>
+                    <h2 className="text-base sm:text-xl font-bold text-neon-green/50">ACT I: SOCIAL ENGINEERING</h2>
+                    <p className="text-xs sm:text-sm text-cyber-blue">PHISHING DETECTION PROTOCOLS</p>
                 </div>
                 <div className="text-right">
                     <div className="text-2xl font-mono font-bold text-neon-green">
@@ -158,7 +158,7 @@ const Act1 = () => {
                         <div className="text-xs text-cyber-blue mb-2 uppercase tracking-wider">
                             {`// INCOMING_${currentQ.type.toUpperCase()}_DETECTED`}
                         </div>
-                        <p className="font-mono text-lg md:text-xl leading-relaxed text-white">
+                        <p className="font-mono text-base sm:text-lg md:text-xl leading-relaxed text-white">
                             {currentQ.question}
                         </p>
                     </motion.div>
@@ -171,12 +171,12 @@ const Act1 = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.1 }}
                                 onClick={() => handleAnswer(opt)}
-                                className="group relative border border-neon-green/40 p-4 text-left hover:border-neon-green hover:bg-neon-green/5 transition-all"
+                                className="group relative border border-neon-green/40 p-3 sm:p-4 text-left hover:border-neon-green hover:bg-neon-green/5 transition-all touch-target"
                             >
                                 <span className="absolute left-3 top-3 text-xs text-neon-green/30 font-mono">
                                     {`[${String.fromCharCode(65 + idx)}]`}
                                 </span>
-                                <span className="block pl-8 text-lg group-hover:text-neon-green transition-colors">
+                                <span className="block pl-6 sm:pl-8 text-sm sm:text-lg group-hover:text-neon-green transition-colors">
                                     {opt.label}
                                 </span>
                             </motion.button>

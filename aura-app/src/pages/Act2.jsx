@@ -80,7 +80,7 @@ const Act2 = () => {
     if (!currentQ) return <div className="p-10 text-center">A carregar...</div>;
 
     return (
-        <div className="h-full flex flex-col max-w-3xl mx-auto pt-6 relative">
+        <div className="h-full flex flex-col max-w-3xl mx-auto px-2 sm:px-0 pt-4 sm:pt-6 relative pb-4">
             {/* Network Breach Overlay (Real Data) */}
             <AnimatePresence>
                 {showHack && (
@@ -94,7 +94,7 @@ const Act2 = () => {
                             <motion.div
                                 animate={{ opacity: [1, 0.5, 1] }}
                                 transition={{ repeat: Infinity, duration: 0.2 }}
-                                className="text-5xl md:text-7xl font-black text-cyber-blue"
+                                className="text-3xl sm:text-5xl md:text-7xl font-black text-cyber-blue"
                             >
                                 ⚡ NETWORK BREACH
                             </motion.div>
@@ -118,7 +118,7 @@ const Act2 = () => {
                 <motion.div
                     initial={{ y: -50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    className="fixed top-0 right-0 m-4 w-64 border border-alert-red bg-deep-black/95 p-4 z-40"
+                    className="fixed top-0 right-0 m-2 sm:m-4 w-48 sm:w-64 border border-alert-red bg-deep-black/95 p-2 sm:p-4 z-40"
                 >
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-xs text-alert-red font-bold animate-pulse">EXFILTRATING DATA...</span>
@@ -142,8 +142,8 @@ const Act2 = () => {
             {/* Header */}
             <div className="mb-6 border-b border-cyber-blue/30 pb-4 flex justify-between items-end">
                 <div>
-                    <h2 className="text-xl font-bold text-cyber-blue/70">ACT II: NETWORK INTRUSION</h2>
-                    <p className="text-sm text-neon-green/60">CONNECTIVITY & PASSWORD PROTOCOLS</p>
+                    <h2 className="text-base sm:text-xl font-bold text-cyber-blue/70">ACT II: NETWORK INTRUSION</h2>
+                    <p className="text-xs sm:text-sm text-neon-green/60">CONNECTIVITY & PASSWORD PROTOCOLS</p>
                 </div>
                 <div className="text-right">
                     <div className="text-2xl font-mono font-bold text-cyber-blue">

@@ -81,7 +81,7 @@ const Act3 = () => {
     if (!currentQ) return <div className="p-10 text-center">A carregar...</div>;
 
     return (
-        <div className="h-full flex flex-col max-w-3xl mx-auto pt-6 relative">
+        <div className="h-full flex flex-col max-w-3xl mx-auto px-2 sm:px-0 pt-4 sm:pt-6 relative pb-4">
             {/* Predator Alert Overlay */}
             <AnimatePresence>
                 {showPredator && (
@@ -95,7 +95,7 @@ const Act3 = () => {
                             <motion.div
                                 animate={{ scale: [1, 1.05, 1] }}
                                 transition={{ repeat: Infinity, duration: 0.4 }}
-                                className="text-5xl md:text-7xl font-black text-purple-400"
+                                className="text-3xl sm:text-5xl md:text-7xl font-black text-purple-400"
                             >
                                 👁️ VOCÊ ESTÁ A SER OBSERVADO
                             </motion.div>
@@ -114,7 +114,7 @@ const Act3 = () => {
                 <motion.div
                     initial={{ opacity: 0, x: 100 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="fixed top-4 right-4 w-56 border border-alert-red bg-deep-black/95 p-3 z-40 font-mono text-xs"
+                    className="fixed top-4 right-2 sm:right-4 w-44 sm:w-56 border border-alert-red bg-deep-black/95 p-2 sm:p-3 z-40 font-mono text-[10px] sm:text-xs"
                 >
                     <div className="flex items-center gap-2 text-alert-red font-bold animate-pulse mb-2">
                         <span className="w-2 h-2 rounded-full bg-alert-red animate-ping"></span>
@@ -135,8 +135,8 @@ const Act3 = () => {
             {/* Header */}
             <div className="mb-6 border-b border-purple-500/30 pb-4 flex justify-between items-end">
                 <div>
-                    <h2 className="text-xl font-bold text-purple-400">ACT III: THE PREDATOR</h2>
-                    <p className="text-sm text-neon-green/60">HUMAN EXPLOITATION VULNERABILITIES</p>
+                    <h2 className="text-base sm:text-xl font-bold text-purple-400">ACT III: THE PREDATOR</h2>
+                    <p className="text-xs sm:text-sm text-neon-green/60">HUMAN EXPLOITATION VULNERABILITIES</p>
                 </div>
                 <div className="text-right">
                     <div className="text-2xl font-mono font-bold text-purple-400">

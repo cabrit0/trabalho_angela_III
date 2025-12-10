@@ -86,13 +86,13 @@ const Report = () => {
     }
 
     return (
-        <div className="h-full flex flex-col items-center justify-center p-4 overflow-y-auto">
+        <div className="min-h-[100dvh] flex flex-col items-center justify-start p-3 sm:p-4 overflow-y-auto no-scrollbar pt-6">
             <motion.div
-                className="text-center space-y-3 w-full max-w-md"
+                className="text-center space-y-2 sm:space-y-3 w-full max-w-md pb-6"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
             >
-                <h1 className="text-3xl font-black text-alert-red">
+                <h1 className="text-2xl sm:text-3xl font-black text-alert-red">
                     <GlitchText text="IDENTITY SOLD" intense={true} />
                 </h1>
 
