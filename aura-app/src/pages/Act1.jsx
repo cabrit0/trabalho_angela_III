@@ -18,7 +18,7 @@ const shuffleOptions = (options) => {
 };
 
 const Act1 = () => {
-    const { reduceScore, addLeakedData, setCurrentStage, deviceData, trackAnswer } = useGame();
+    const { reduceScore, increaseScore, addLeakedData, setCurrentStage, deviceData, trackAnswer } = useGame();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [feedback, setFeedback] = useState(null);
     const [showDataLeak, setShowDataLeak] = useState(false);
@@ -42,10 +42,11 @@ const Act1 = () => {
 
         if (isSafe) {
             play('success');
+            increaseScore(3); // Award points for correct answer
             setFeedback({ type: 'success', message: currentQ.feedback.safe });
         } else {
             play('error');
-            reduceScore(10);
+            reduceScore(5); // Reduced penalty from 10 to 5
 
             const leakType = option.risk === 'high' ? 'CRITICAL' : 'WARNING';
             addLeakedData({

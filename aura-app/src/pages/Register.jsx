@@ -36,7 +36,8 @@ const Register = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!username.trim()) return;
+        // Require BOTH username and password
+        if (!username.trim() || !password.trim()) return;
 
         setIsLoading(true);
 
@@ -139,8 +140,8 @@ const Register = () => {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        disabled={!username.trim()}
-                        className="w-full border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-deep-black disabled:opacity-30 py-3 font-bold tracking-widest transition-all uppercase"
+                        disabled={!username.trim() || !password.trim()}
+                        className="w-full border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-deep-black disabled:opacity-30 disabled:cursor-not-allowed py-3 font-bold tracking-widest transition-all uppercase"
                     >
                         INICIAR SIMULAÇÃO »
                     </button>

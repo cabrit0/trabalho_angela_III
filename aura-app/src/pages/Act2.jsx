@@ -18,7 +18,7 @@ const shuffleOptions = (options) => {
 };
 
 const Act2 = () => {
-    const { reduceScore, addLeakedData, setCurrentStage, deviceData, trackAnswer } = useGame();
+    const { reduceScore, increaseScore, addLeakedData, setCurrentStage, deviceData, trackAnswer } = useGame();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [feedback, setFeedback] = useState(null);
     const [downloadProgress, setDownloadProgress] = useState(0);
@@ -40,10 +40,11 @@ const Act2 = () => {
 
         if (isSafe) {
             play('success');
+            increaseScore(3);
             setFeedback({ type: 'success', message: currentQ.feedback.safe });
         } else {
             play('error');
-            reduceScore(10);
+            reduceScore(5);
 
             addLeakedData({
                 label: `[BREACH] ${currentQ.type.toUpperCase()}`,

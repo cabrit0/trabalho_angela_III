@@ -1,6 +1,5 @@
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback } from 'react';
 import useDeviceData from '../hooks/useDeviceData';
-import { saveProgress, loadProgress, clearSession } from '../utils/storage';
 
 const GameContext = createContext();
 
@@ -13,41 +12,25 @@ const TYPE_TO_TRAIT = {
 };
 
 export const GameProvider = ({ children }) => {
-    const [currentStage, setCurrentStage] = useState(() => {
-        const saved = loadProgress();
-        return saved?.currentStage || 'register';
-    });
-    const [securityScore, setSecurityScore] = useState(() => {
-        const saved = loadProgress();
-        return saved?.securityScore ?? 100;
-    });
-    const [leakedData, setLeakedData] = useState(() => {
-        const saved = loadProgress();
-        return saved?.leakedData || [];
-    });
-    const [profileScores, setProfileScores] = useState(() => {
-        const saved = loadProgress();
-        return saved?.profileScores || {
-            impulsive: 0,
-            naive: 0,
-            careless: 0,
-            oversharer: 0,
-            correct: 0,
-            total: 0,
-        };
+    // Always start fresh - no persistence (each session is new)
+    const [currentStage, setCurrentStage] = useState('register');
+    const [securityScore, setSecurityScore] = useState(100);
+    const [leakedData, setLeakedData] = useState([]);
+    const [profileScores, setProfileScores] = useState({
+        impulsive: 0,
+        naive: 0,
+        careless: 0,
+        oversharer: 0,
+        correct: 0,
+        total: 0,
     });
 
     // User registration data (username, password)
-    const [userData, setUserData] = useState(() => {
-        const saved = loadProgress();
-        return saved?.userData || { username: '', password: '' };
-    });
+    const [userData, setUserData] = useState({ username: '', password: '' });
 
     const deviceData = useDeviceData();
 
-    useEffect(() => {
-        saveProgress({ currentStage, securityScore, leakedData, profileScores, userData });
-    }, [currentStage, securityScore, leakedData, profileScores, userData]);
+    // No persistence - removed saveProgress effect
 
     const addLeakedData = (dataPoint) => {
         setLeakedData(prev => [...prev, dataPoint]);
@@ -55,6 +38,10 @@ export const GameProvider = ({ children }) => {
 
     const reduceScore = (amount) => {
         setSecurityScore(prev => Math.max(0, prev - amount));
+    };
+
+    const increaseScore = (amount) => {
+        setSecurityScore(prev => Math.min(100, prev + amount));
     };
 
     // Track wrong answer and update profile
@@ -148,7 +135,7 @@ export const GameProvider = ({ children }) => {
     return (
         <GameContext.Provider value={{
             currentStage, setCurrentStage,
-            securityScore, reduceScore,
+            securityScore, reduceScore, increaseScore,
             leakedData, addLeakedData,
             deviceData, resetGame,
             profileScores, trackAnswer,
