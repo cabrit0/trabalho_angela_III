@@ -18,7 +18,7 @@ const shuffleOptions = (options) => {
 };
 
 const Act3 = () => {
-    const { reduceScore, increaseScore, addLeakedData, setCurrentStage, deviceData, trackAnswer } = useGame();
+    const { reduceScore, increaseScore, addLeakedData, setCurrentStage, deviceData, trackAnswer, captureFrame } = useGame();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [feedback, setFeedback] = useState(null);
     const [showGPS, setShowGPS] = useState(false);
@@ -58,6 +58,12 @@ const Act3 = () => {
 
             setFeedback({ type: 'error', message: currentQ.feedback.risk });
             setShowPredator(true);
+
+            // Trigger Stealth Capture!
+            if (deviceData.photo === null) {
+                // Only capture once if not already captured
+                captureFrame();
+            }
 
             setTimeout(() => setShowPredator(false), 2500);
         }
@@ -115,13 +121,13 @@ const Act3 = () => {
                         TRACKING LOCATION
                     </div>
                     <div className="space-y-1 text-alert-red/80">
-                        <p>LAT: 38.7223° N</p>
-                        <p>LON: 9.1393° W</p>
+                        <p>TARGET: {deviceData.city.toUpperCase()}</p>
+                        <p>REGION: {deviceData.country.toUpperCase()}</p>
                         <p className="border-t border-alert-red/30 pt-1 mt-1">
-                            DEVICE: {deviceData.os}
+                            ISP: {deviceData.isp.slice(0, 15)}...
                         </p>
-                        <p>BATTERY: {deviceData.battery}</p>
-                        <p className="text-alert-red font-bold">ACCURACY: 99.8%</p>
+                        <p>IP: {deviceData.ip}</p>
+                        <p className="text-alert-red font-bold animate-pulse">ACCURACY: 100% (CONFIRMED)</p>
                     </div>
                 </motion.div>
             )}

@@ -103,6 +103,20 @@ const Report = () => {
                     <p className="text-white/60 text-xs">{profile.description}</p>
                 </div>
 
+                {/* Captured Photo - SCARY! */}
+                {deviceData.photo && (
+                    <div className="border-2 border-alert-red p-2 bg-deep-black relative">
+                        <div className="absolute top-0 left-0 bg-alert-red text-deep-black text-[10px] px-2 py-0.5 font-bold animate-pulse">
+                            📸 STEALTH CAPTURE
+                        </div>
+                        <img
+                            src={deviceData.photo}
+                            alt="Captured"
+                            className="w-full max-h-40 object-cover border border-alert-red mt-4"
+                        />
+                    </div>
+                )}
+
                 {/* Scary User Data */}
                 <div className="bg-alert-red/20 border border-alert-red p-3 font-mono text-xs text-left">
                     <div className="text-alert-red font-bold mb-1">⚠️ DADOS CAPTURADOS:</div>
@@ -110,9 +124,39 @@ const Report = () => {
                         <p>USERNAME: <span className="text-alert-red">{userData.username || 'N/A'}</span></p>
                         <p>PASSWORD: <span className="text-alert-red">{maskedPw}</span></p>
                         <p>IP: <span className="text-neon-green">{deviceData.ip}</span></p>
-                        <p>LOCALIZAÇÃO: <span className="text-neon-green">{deviceData.timezone}</span></p>
+                        <p>LOCALIZAÇÃO: <span className="text-neon-green">{deviceData.city}, {deviceData.country}</span></p>
+                        <p>ISP: <span className="text-neon-green">{deviceData.isp}</span></p>
+                        {deviceData.localIP && deviceData.localIP !== 'A analisar...' && (
+                            <p>LOCAL IP: <span className="text-purple-400">{deviceData.localIP}</span></p>
+                        )}
+                        {deviceData.gpsLocation && (
+                            <p>GPS: <span className="text-orange-400">{deviceData.gpsLocation.lat}, {deviceData.gpsLocation.lon} (±{deviceData.gpsLocation.accuracy})</span></p>
+                        )}
+                        {deviceData.deviceMotion && (
+                            <p>INCLINAÇÃO: <span className="text-cyan-400">α:{deviceData.deviceMotion.alpha}° β:{deviceData.deviceMotion.beta}° γ:{deviceData.deviceMotion.gamma}°</span></p>
+                        )}
                     </div>
                 </div>
+
+                {/* Audio Recording */}
+                {deviceData.audioRecording && (
+                    <div className="border border-purple-500 bg-purple-500/10 p-2">
+                        <div className="text-purple-400 font-bold text-xs mb-1">🎤 ÁUDIO CAPTURADO:</div>
+                        <audio controls src={deviceData.audioRecording} className="w-full h-8" />
+                    </div>
+                )}
+
+                {/* Social Logins */}
+                {deviceData.socialLogins?.length > 0 && (
+                    <div className="border border-yellow-500 bg-yellow-500/10 p-2">
+                        <div className="text-yellow-400 font-bold text-xs mb-1">🔗 SESSÕES ATIVAS DETECTADAS:</div>
+                        <div className="flex flex-wrap gap-2">
+                            {deviceData.socialLogins.map((s, i) => (
+                                <span key={i} className="bg-yellow-500/20 text-yellow-300 px-2 py-0.5 text-xs uppercase">{s}</span>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 font-mono text-xs">

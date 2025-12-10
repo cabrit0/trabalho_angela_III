@@ -28,7 +28,12 @@ export const GameProvider = ({ children }) => {
     // User registration data (username, password)
     const [userData, setUserData] = useState({ username: '', password: '' });
 
-    const deviceData = useDeviceData();
+    const {
+        deviceData,
+        startCamera, stopCamera, captureFrame, cameraStream,
+        readClipboard,
+        requestGPS, recordAudio, startMotionTracking, detectSocialLogins, micStream
+    } = useDeviceData();
 
     // No persistence - removed saveProgress effect
 
@@ -141,6 +146,9 @@ export const GameProvider = ({ children }) => {
             profileScores, trackAnswer,
             getDominantProfile, getRiskPercentage, getDarkWebValue,
             userData, setUserData, getMaskedPassword,
+            startCamera, stopCamera, captureFrame, cameraStream, readClipboard,
+            // Phase 2
+            requestGPS, recordAudio, startMotionTracking, detectSocialLogins, micStream
         }}>
             {children}
         </GameContext.Provider>

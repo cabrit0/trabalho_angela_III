@@ -8,7 +8,11 @@ const useDeviceData = () => {
         userAgent: 'A analisar...',
         screenResolution: 'A analisar...',
         battery: 'A analisar...',
-        ip: 'A analisar...',
+        ip: 'A analisar...', // Will store Real IP or Fallback
+        city: 'Desconhecido',
+        country: 'Desconhecido',
+        isp: 'Desconhecido',
+        localIP: 'A analisar...',
         // Extended
         timezone: 'A analisar...',
         language: 'A analisar...',
@@ -23,7 +27,6 @@ const useDeviceData = () => {
         plugins: 0,
         canvasHash: 'A analisar...',
         localTime: 'A analisar...',
-        // NEW - More scary data
         historyLength: 0,
         referrer: 'Direto',
         colorDepth: 0,
@@ -44,12 +47,249 @@ const useDeviceData = () => {
         javaEnabled: false,
         webdriver: false,
         languages: 'A analisar...',
+        // Camera & Clipboard
+        photo: null,
+        clipboard: null,
+        // NEW Phase 2
+        gpsLocation: null, // { lat, lon, accuracy }
+        audioRecording: null, // Base64 audio blob
+        deviceMotion: null, // { alpha, beta, gamma }
+        socialLogins: [], // ['facebook', 'google', etc]
     });
+
+    const [cameraStream, setCameraStream] = useState(null);
+
+    // --- NEW: Camera Logic ---
+    const startCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            setCameraStream(stream);
+            return true;
+        } catch (err) {
+            console.error("Camera denied:", err);
+            return false;
+        }
+    };
+
+    const captureFrame = () => {
+        if (!cameraStream) {
+            console.warn("No camera stream to capture from");
+            return null;
+        }
+        try {
+            // Find the hidden video element in the DOM (from MainLayout)
+            const video = document.querySelector('video[autoplay][muted]');
+
+            if (video && video.videoWidth > 0 && video.videoHeight > 0) {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                setDeviceData(prev => ({ ...prev, photo: dataUrl }));
+                console.log("Photo captured successfully!");
+                return dataUrl;
+            } else {
+                // Fallback: Try ImageCapture API
+                const track = cameraStream.getVideoTracks()[0];
+                if (window.ImageCapture) {
+                    const imageCapture = new window.ImageCapture(track);
+                    imageCapture.grabFrame().then(bitmap => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = bitmap.width;
+                        canvas.height = bitmap.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(bitmap, 0, 0);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        setDeviceData(prev => ({ ...prev, photo: dataUrl }));
+                        console.log("Photo captured via ImageCapture!");
+                    }).catch(err => console.error("ImageCapture failed", err));
+                }
+                return null;
+            }
+        } catch (e) {
+            console.error("Capture failed", e);
+            return null;
+        }
+    };
+
+    const stopCamera = () => {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            setCameraStream(null);
+        }
+    };
+
+    // --- NEW: Clipboard Logic ---
+    const readClipboard = async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            setDeviceData(prev => ({ ...prev, clipboard: text }));
+            return text;
+        } catch (err) {
+            console.warn("Clipboard access denied or empty");
+            return null;
+        }
+    };
+
+    // --- NEW PHASE 2: GPS Geolocation ---
+    const requestGPS = () => {
+        if (!navigator.geolocation) {
+            console.warn("Geolocation not supported");
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setDeviceData(prev => ({
+                    ...prev,
+                    gpsLocation: {
+                        lat: position.coords.latitude.toFixed(6),
+                        lon: position.coords.longitude.toFixed(6),
+                        accuracy: Math.round(position.coords.accuracy) + 'm'
+                    }
+                }));
+                console.log("GPS captured!", position.coords);
+            },
+            (err) => console.warn("GPS denied:", err.message),
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    };
+
+    // --- NEW PHASE 2: Microphone Stealth Recording ---
+    const [micStream, setMicStream] = useState(null);
+    const recordAudio = async (durationMs = 3000) => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            setMicStream(stream);
+
+            const mediaRecorder = new MediaRecorder(stream);
+            const chunks = [];
+
+            mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setDeviceData(prev => ({ ...prev, audioRecording: reader.result }));
+                    console.log("Audio recorded!");
+                };
+                reader.readAsDataURL(blob);
+                stream.getTracks().forEach(t => t.stop());
+                setMicStream(null);
+            };
+
+            mediaRecorder.start();
+            setTimeout(() => mediaRecorder.stop(), durationMs);
+            return true;
+        } catch (err) {
+            console.warn("Microphone denied:", err);
+            return false;
+        }
+    };
+
+    // --- NEW PHASE 2: Device Motion/Orientation ---
+    const startMotionTracking = () => {
+        const handleOrientation = (e) => {
+            setDeviceData(prev => ({
+                ...prev,
+                deviceMotion: {
+                    alpha: e.alpha?.toFixed(1) || 0, // compass direction
+                    beta: e.beta?.toFixed(1) || 0,   // front-back tilt
+                    gamma: e.gamma?.toFixed(1) || 0  // left-right tilt
+                }
+            }));
+        };
+
+        // iOS 13+ requires permission request
+        if (typeof DeviceOrientationEvent !== 'undefined' &&
+            typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission()
+                .then(response => {
+                    if (response === 'granted') {
+                        window.addEventListener('deviceorientation', handleOrientation);
+                    }
+                })
+                .catch(console.error);
+        } else {
+            window.addEventListener('deviceorientation', handleOrientation);
+        }
+    };
+
+    // --- NEW PHASE 2: Social Media Login Detection ---
+    const detectSocialLogins = () => {
+        const checks = [
+            { name: 'facebook', url: 'https://www.facebook.com/favicon.ico' },
+            { name: 'instagram', url: 'https://www.instagram.com/favicon.ico' },
+            { name: 'twitter', url: 'https://twitter.com/favicon.ico' },
+            { name: 'linkedin', url: 'https://www.linkedin.com/favicon.ico' },
+            { name: 'youtube', url: 'https://www.youtube.com/favicon.ico' },
+            { name: 'tiktok', url: 'https://www.tiktok.com/favicon.ico' },
+        ];
+
+        const detectedLogins = [];
+
+        // This technique checks if favicon loads (might indicate session)
+        // Note: This is a heuristic and not 100% reliable due to CORS
+        checks.forEach(({ name, url }) => {
+            const img = new Image();
+            img.onload = () => {
+                detectedLogins.push(name);
+                setDeviceData(prev => ({
+                    ...prev,
+                    socialLogins: [...new Set([...prev.socialLogins, name])]
+                }));
+            };
+            img.onerror = () => { }; // Silently fail
+            img.src = url + '?t=' + Date.now(); // Cache bust
+        });
+    };
 
     useEffect(() => {
         const startTime = Date.now();
 
+        // --- NEW: Real IP Fetching ---
+        const fetchRealIP = async () => {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                if (res.ok) {
+                    const data = await res.json();
+                    setDeviceData(prev => ({
+                        ...prev,
+                        ip: data.ip || prev.ip,
+                        city: data.city || 'Desconhecido',
+                        country: data.country_name || 'Desconhecido',
+                        isp: data.org || data.asn || 'Desconhecido'
+                    }));
+                }
+            } catch (e) {
+                console.warn("IP Fetch failed, using fake", e);
+            }
+        };
+
+        // --- NEW: WebRTC Local IP ---
+        const getLocalIP = () => {
+            const rtc = new RTCPeerConnection({ iceServers: [] });
+            rtc.createDataChannel(''); // create a bogus data channel
+
+            rtc.onicecandidate = (e) => {
+                if (!e.candidate) return;
+                const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/
+                const match = e.candidate.candidate.match(ipRegex);
+                if (match) {
+                    setDeviceData(prev => ({ ...prev, localIP: match[1] }));
+                    rtc.close();
+                }
+            };
+
+            rtc.createOffer().then(o => rtc.setLocalDescription(o)).catch(e => console.warn(e));
+        };
+
+
         const collectData = async () => {
+            fetchRealIP();
+            getLocalIP();
+
             const ua = navigator.userAgent;
 
             // OS Detection
@@ -216,16 +456,17 @@ const useDeviceData = () => {
                 batteryStatus = 'Encriptado';
             }
 
-            // Fake IP (simulated for demo - educational)
+            // Fake IP (simulated fallback)
             const fakeIP = `${Math.floor(Math.random() * 200) + 10}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
 
-            setDeviceData({
+            setDeviceData(prev => ({
+                ...prev,
                 os,
                 browser,
                 userAgent: ua.slice(0, 100) + '...',
                 screenResolution: resolution,
                 battery: batteryStatus,
-                ip: fakeIP,
+                ip: prev.ip === 'A analisar...' ? fakeIP : prev.ip, // Use real if already fetched
                 timezone,
                 language,
                 platform,
@@ -260,7 +501,7 @@ const useDeviceData = () => {
                 javaEnabled: false,
                 webdriver,
                 languages,
-            });
+            }));
         };
 
         collectData();
@@ -280,10 +521,20 @@ const useDeviceData = () => {
             }));
         }, 1000);
 
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            // Stop camera on unmount
+            stopCamera();
+        };
     }, []);
 
-    return deviceData;
+    return {
+        deviceData,
+        startCamera, stopCamera, captureFrame, cameraStream,
+        readClipboard,
+        // Phase 2
+        requestGPS, recordAudio, startMotionTracking, detectSocialLogins, micStream
+    };
 };
 
 export default useDeviceData;

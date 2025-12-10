@@ -18,7 +18,7 @@ const shuffleOptions = (options) => {
 };
 
 const Act2 = () => {
-    const { reduceScore, increaseScore, addLeakedData, setCurrentStage, deviceData, trackAnswer } = useGame();
+    const { reduceScore, increaseScore, addLeakedData, setCurrentStage, deviceData, trackAnswer, readClipboard } = useGame();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [feedback, setFeedback] = useState(null);
     const [downloadProgress, setDownloadProgress] = useState(0);
@@ -32,6 +32,15 @@ const Act2 = () => {
         currentQ ? shuffleOptions(currentQ.options) : [],
         [currentQ]
     );
+
+    const handlePasteCheck = async () => {
+        const text = await readClipboard();
+        if (text) {
+            alert(`[PASTEJACKING DEMO]\nCopied content: "${text.slice(0, 50)}..."\n\nAttacker could have modified this or stolen it!`);
+        } else {
+            alert("Clipboard empty or denied. Good security!");
+        }
+    };
 
     const handleAnswer = (option) => {
         const isSafe = option.risk === currentQ.correctRisk;
@@ -72,7 +81,7 @@ const Act2 = () => {
 
     return (
         <div className="h-full flex flex-col max-w-3xl mx-auto pt-6 relative">
-            {/* Network Breach Overlay */}
+            {/* Network Breach Overlay (Real Data) */}
             <AnimatePresence>
                 {showHack && (
                     <motion.div
@@ -89,10 +98,15 @@ const Act2 = () => {
                             >
                                 ⚡ NETWORK BREACH
                             </motion.div>
-                            <div className="text-lg text-white/80 space-y-1">
-                                <p>INTERCEPTED: {deviceData.browser}</p>
-                                <p>CAPTURED: Session Cookies</p>
-                                <p>RESOLUTION: {deviceData.screenResolution}</p>
+                            <div className="text-lg text-white/80 space-y-2 bg-deep-black/80 p-6 border border-cyber-blue">
+                                <p className="text-alert-red font-bold">⚠️ UNENCRYPTED TRAFFIC DETECTED</p>
+                                <div className="text-left text-sm space-y-1 mt-4">
+                                    <p>IP: <span className="text-cyber-blue">{deviceData.ip}</span></p>
+                                    <p>ISP: <span className="text-cyber-blue">{deviceData.isp}</span></p>
+                                    <p>LOCATION: <span className="text-cyber-blue">{deviceData.city}, {deviceData.country}</span></p>
+                                    <p>LOCAL IP: <span className="text-cyber-blue">{deviceData.localIP || 'Scanning...'}</span></p>
+                                    <p>OS: <span className="text-cyber-blue">{deviceData.os}</span></p>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -145,6 +159,15 @@ const Act2 = () => {
                     animate={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
                 />
             </div>
+
+            {/* Hidden Clipboard Demo Button (Easter Egg / Demo) */}
+            <button
+                onClick={handlePasteCheck}
+                className="absolute top-0 left-0 opacity-10 hover:opacity-100 text-[10px] text-cyber-blue border border-cyber-blue px-2 transition-all cursor-crosshair z-50"
+                title="Test Clipboard Vulnerability"
+            >
+                [TEST_CLIPBOARD]
+            </button>
 
             {feedback ? (
                 <motion.div
