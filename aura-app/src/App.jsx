@@ -6,6 +6,7 @@ import Act1 from './pages/Act1';
 import Act2 from './pages/Act2';
 import Act3 from './pages/Act3';
 import Boss from './pages/Boss';
+import Report from './pages/Report';
 
 
 const GameStage = () => {
@@ -22,6 +23,8 @@ const GameStage = () => {
       return <Act3 />;
     case 'boss':
       return <Boss />;
+    case 'report':
+      return <Report />;
       return <div>Stage Not Found</div>;
   }
 };

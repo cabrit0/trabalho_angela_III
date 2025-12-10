@@ -159,30 +159,30 @@ Baseado nos PDFs fornecidos.
 [x] Perguntas de tempo limitado (stress) sobre o valor dos dados.
 
 Fase 5: O Clímax e Debriefing 🏁
-[ ] Ecrã "Relatório de Vítima"
+[x] Ecrã "Relatório de Vítima"
 
-[ ] Compilar todas as respostas erradas numa lista.
+[x] Compilar todas as respostas erradas numa lista.
 
-[ ] Mostrar mensagem assustadora: "A tua identidade digital foi vendida por 0.05 BTC".
+[x] Mostrar mensagem assustadora: "A tua identidade digital foi vendida por 0.05 BTC".
 
-[ ] Botão de "Pânico" ou contagem decrescente falsa.
+[x] Botão de "Pânico" ou contagem decrescente falsa.
 
-[ ] Ecrã de Debriefing (O Alívio).
+[x] Ecrã de Debriefing (O Alívio).
 
-[ ] Transição visual para um design "Limpo/Escolar" (branco/azul).
+[x] Transição visual para um design "Limpo/Escolar" (branco/azul).
 
-[ ] Mensagem clara: "Isto foi uma simulação."
+[x] Mensagem clara: "Isto foi uma simulação."
 
-[ ] Resumo educativo dos erros cometidos.
+[x] Resumo educativo dos erros cometidos.
 
-[ ] Botão "Reiniciar Sistema" (Limpa LocalStorage).
+[x] Botão "Reiniciar Sistema" (Limpa LocalStorage).
 
 Fase 6: Polimento e Testes
-[ ] Mobile Responsiveness: Testar em telemóvel (já que os alunos usarão smartphones ).
+[x] Mobile Responsiveness: Testar em telemóvel (já que os alunos usarão smartphones ).
 
-[ ] Performance: Garantir que as animações não travam em telemóveis mais fracos.
+[x] Performance: Garantir que as animações não travam em telemóveis mais fracos.
 
-[ ] Deploy: Configurar build para Vercel ou Netlify.
+[x] Deploy: Configurar build para Vercel ou Netlify.
 
 4. Notas Técnicas Importantes
 A Ilusão: Nunca guardes dados reais num servidor. Tudo deve viver na memória do browser (state) e localStorage apenas durante a sessão.
