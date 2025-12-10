@@ -122,7 +122,7 @@ export const GameProvider = ({ children }) => {
     }, [userData]);
 
     const resetGame = () => {
-        clearSession();
+        // Reset all state to initial values
         setCurrentStage('register');
         setSecurityScore(100);
         setLeakedData([]);

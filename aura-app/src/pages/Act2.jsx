@@ -65,7 +65,7 @@ const Act2 = () => {
             } else {
                 setCurrentStage('act3');
             }
-        }, 2500);
+        }, 4000);
     };
 
     if (!currentQ) return <div className="p-10 text-center">A carregar...</div>;

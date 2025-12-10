@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGame } from '../context/GameContext';
 import GlitchText from '../components/effects/GlitchText';
@@ -29,18 +29,18 @@ const Report = () => {
                 animate={{ opacity: 1 }}
                 className="fixed inset-0 z-50 bg-white text-slate-800 overflow-y-auto"
             >
-                <div className="min-h-full p-4 flex flex-col">
+                <div className="min-h-full p-3 flex flex-col">
                     <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col">
-                        <header className="border-b border-slate-200 pb-2 text-center">
+                        <header className="text-center py-2">
                             <h1 className="text-xl font-bold text-blue-600">SIMULAÇÃO TERMINADA</h1>
                         </header>
 
-                        <section className="bg-blue-50 p-3 my-3 border border-blue-100">
-                            <h2 className="text-base font-bold text-blue-800">🎉 Não entres em pânico!</h2>
-                            <p className="text-sm">Isto foi uma simulação. <strong>NENHUM dado foi roubado.</strong></p>
+                        <section className="bg-blue-50 p-2 mb-2 border border-blue-100 text-sm">
+                            <span className="font-bold text-blue-800">🎉 Não entres em pânico!</span>
+                            <span className="ml-1">Isto foi uma simulação. <strong>NENHUM</strong> dado foi roubado.</span>
                         </section>
 
-                        <div className="grid grid-cols-2 gap-2 mb-3">
+                        <div className="grid grid-cols-2 gap-2 mb-2">
                             <div className="bg-slate-100 p-2 rounded text-center">
                                 <span className="text-xs text-slate-500">Pontuação</span>
                                 <span className={`block text-lg font-bold ${securityScore > 70 ? 'text-green-600' : 'text-red-600'}`}>
@@ -53,29 +53,28 @@ const Report = () => {
                             </div>
                         </div>
 
+                        {/* Errors list - LARGER visible area */}
                         {leakedData.length > 0 && (
-                            <div className="flex-1 min-h-0 mb-3">
+                            <div className="flex-1 mb-2">
                                 <h4 className="font-bold text-xs text-red-600 mb-1">Erros ({leakedData.length}):</h4>
-                                <div className="h-32 overflow-y-auto border border-slate-200 rounded p-2 bg-slate-50">
+                                <div className="h-48 overflow-y-auto border border-slate-200 rounded p-2 bg-slate-50">
                                     <ul className="space-y-0.5 text-xs text-slate-600">
-                                        {leakedData.slice(0, 15).map((data, idx) => (
-                                            <li key={idx} className="truncate">
-                                                <span className="font-mono bg-red-100 text-red-700 px-1 rounded mr-1">{data.label}</span>
-                                                {data.value}
+                                        {leakedData.map((data, idx) => (
+                                            <li key={idx} className="py-0.5 border-b border-slate-100">
+                                                <span className="font-mono bg-red-100 text-red-700 px-1 rounded mr-1 text-[10px]">{data.label}</span>
+                                                <span className="text-slate-700">{data.value}</span>
                                             </li>
                                         ))}
-                                        {leakedData.length > 15 && (
-                                            <li className="text-slate-400">+ {leakedData.length - 15} mais...</li>
-                                        )}
                                     </ul>
                                 </div>
                             </div>
                         )}
 
-                        <div className="text-center py-3">
+                        {/* Button - always visible at bottom */}
+                        <div className="text-center py-3 bg-white sticky bottom-0">
                             <button
                                 onClick={resetGame}
-                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow"
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg text-lg"
                             >
                                 TENTAR NOVAMENTE
                             </button>
