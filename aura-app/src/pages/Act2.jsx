@@ -1,19 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '../context/GameContext';
-import { SCENARIO_DATA } from '../data/scenario';
+import { SCENARIO_DATA, getRandomQuestions } from '../data/scenario';
 import GlitchText from '../components/effects/GlitchText';
 import useSound from '../hooks/useSound';
 
+const QUESTIONS_PER_ACT = 10;
+
+// Shuffle array utility for randomizing answer order
+const shuffleOptions = (options) => {
+    const shuffled = [...options];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+};
+
 const Act2 = () => {
-    const { reduceScore, addLeakedData, setCurrentStage } = useGame();
+    const { reduceScore, addLeakedData, setCurrentStage, deviceData } = useGame();
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [feedback, setFeedback] = useState(null);
-    const [downloadProgress, setDownloadProgress] = useState(0); // Visual scare
+    const [downloadProgress, setDownloadProgress] = useState(0);
+    const [showHack, setShowHack] = useState(false);
     const { play } = useSound();
 
-    const questions = SCENARIO_DATA.act2;
+    const questions = useMemo(() => getRandomQuestions(SCENARIO_DATA.act2, QUESTIONS_PER_ACT), []);
     const currentQ = questions[currentQuestionIndex];
+
+    // Shuffle options for current question
+    const shuffledOptions = useMemo(() =>
+        currentQ ? shuffleOptions(currentQ.options) : [],
+        [currentQ]
+    );
 
     const handleAnswer = (option) => {
         const isSafe = option.risk === currentQ.correctRisk;
@@ -23,12 +42,18 @@ const Act2 = () => {
             setFeedback({ type: 'success', message: currentQ.feedback.safe });
         } else {
             play('error');
-            reduceScore(20);
-            addLeakedData({ label: `Act 2 Failed: Q${currentQuestionIndex + 1}`, value: option.label });
-            setFeedback({ type: 'error', message: currentQ.feedback.risk });
+            reduceScore(10);
 
-            // Simulate data theft progress
-            setDownloadProgress(prev => Math.min(prev + 50, 100));
+            addLeakedData({
+                label: `[BREACH] ${currentQ.type.toUpperCase()}`,
+                value: option.label
+            });
+
+            setFeedback({ type: 'error', message: currentQ.feedback.risk });
+            setDownloadProgress(prev => Math.min(prev + 15, 100));
+            setShowHack(true);
+
+            setTimeout(() => setShowHack(false), 2000);
         }
 
         setTimeout(() => {
@@ -38,61 +63,137 @@ const Act2 = () => {
             } else {
                 setCurrentStage('act3');
             }
-        }, 3500);
+        }, 2500);
     };
 
-    if (!currentQ) return <div>LOADING_ACT_II...</div>;
+    if (!currentQ) return <div className="p-10 text-center">A carregar...</div>;
 
     return (
-        <div className="h-full flex flex-col max-w-2xl mx-auto pt-10 relative">
-            <div className="mb-8 border-b border-neon-green/30 pb-4 flex justify-between items-end">
+        <div className="h-full flex flex-col max-w-3xl mx-auto pt-6 relative">
+            {/* Network Breach Overlay */}
+            <AnimatePresence>
+                {showHack && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-cyber-blue/20 z-50 flex items-center justify-center pointer-events-none"
+                    >
+                        <div className="text-center space-y-4 font-mono">
+                            <motion.div
+                                animate={{ opacity: [1, 0.5, 1] }}
+                                transition={{ repeat: Infinity, duration: 0.2 }}
+                                className="text-5xl md:text-7xl font-black text-cyber-blue"
+                            >
+                                ⚡ NETWORK BREACH
+                            </motion.div>
+                            <div className="text-lg text-white/80 space-y-1">
+                                <p>INTERCEPTED: {deviceData.browser}</p>
+                                <p>CAPTURED: Session Cookies</p>
+                                <p>RESOLUTION: {deviceData.screenResolution}</p>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Download Progress - Always visible */}
+            {downloadProgress > 0 && (
+                <motion.div
+                    initial={{ y: -50, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    className="fixed top-0 right-0 m-4 w-64 border border-alert-red bg-deep-black/95 p-4 z-40"
+                >
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-alert-red font-bold animate-pulse">EXFILTRATING DATA...</span>
+                        <span className="text-alert-red font-mono">{downloadProgress}%</span>
+                    </div>
+                    <div className="w-full h-3 bg-deep-black border border-alert-red">
+                        <motion.div
+                            className="h-full bg-alert-red"
+                            animate={{ width: `${downloadProgress}%` }}
+                            transition={{ duration: 0.5 }}
+                        />
+                    </div>
+                    <div className="mt-2 text-xs text-alert-red/60 font-mono">
+                        {`> passwords.db`}<br />
+                        {`> cookies.sqlite`}<br />
+                        {`> history.json`}
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Header */}
+            <div className="mb-6 border-b border-cyber-blue/30 pb-4 flex justify-between items-end">
                 <div>
-                    <h2 className="text-xl font-bold text-neon-green/50">ACT II: INTRUSION</h2>
-                    <p className="text-sm text-cyber-blue">NETWORK SECURITY PROTOCOLS</p>
+                    <h2 className="text-xl font-bold text-cyber-blue/70">ACT II: NETWORK INTRUSION</h2>
+                    <p className="text-sm text-neon-green/60">CONNECTIVITY & PASSWORD PROTOCOLS</p>
                 </div>
-                <div className="text-right font-mono text-xs opacity-60">
-                    SEQ: {currentQuestionIndex + 1}/{questions.length}
+                <div className="text-right">
+                    <div className="text-2xl font-mono font-bold text-cyber-blue">
+                        {currentQuestionIndex + 1}/{questions.length}
+                    </div>
                 </div>
             </div>
 
-            {/* Downloading Overlay Scare */}
-            {downloadProgress > 0 && (
-                <div className="absolute top-0 right-0 p-4 w-48 border border-alert-red bg-deep-black/90 pointer-events-none transition-all">
-                    <div className="text-alert-red text-xs font-bold animate-pulse mb-1">DOWNLOADING USER DATA...</div>
-                    <div className="w-full bg-deep-black border border-alert-red h-2">
-                        <div className="bg-alert-red h-full transition-all duration-1000" style={{ width: `${downloadProgress}%` }}></div>
-                    </div>
-                    <div className="text-right text-alert-red text-xs mt-1">{downloadProgress}%</div>
-                </div>
-            )}
+            {/* Progress */}
+            <div className="w-full h-2 bg-deep-black border border-cyber-blue/30 mb-6">
+                <motion.div
+                    className="h-full bg-cyber-blue"
+                    animate={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
+                />
+            </div>
 
             {feedback ? (
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className={`flex-1 flex flex-col items-center justify-center text-center p-8 border-2 ${feedback.type === 'success' ? 'border-neon-green/50' : 'border-alert-red/50'}`}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className={`flex-1 flex flex-col items-center justify-center text-center p-8 border-4 ${feedback.type === 'success'
+                        ? 'border-neon-green bg-neon-green/10'
+                        : 'border-alert-red bg-alert-red/10'
+                        }`}
                 >
-                    <h3 className={`text-3xl font-bold mb-4 ${feedback.type === 'success' ? 'text-neon-green' : 'text-alert-red'}`}>
-                        <GlitchText text={feedback.type === 'success' ? 'CONNECTION SECURE' : 'PACKETS INTERCEPTED'} intense={feedback.type === 'error'} />
-                    </h3>
-                    <p className="font-mono text-lg">{feedback.message}</p>
+                    <motion.h3
+                        animate={feedback.type === 'error' ? { rotate: [-1, 1, -1, 1, 0] } : {}}
+                        className={`text-3xl md:text-4xl font-black mb-6 ${feedback.type === 'success' ? 'text-neon-green' : 'text-alert-red'
+                            }`}
+                    >
+                        <GlitchText
+                            text={feedback.type === 'success' ? '🔒 CONNECTION SECURED' : '🔓 FIREWALL BYPASSED'}
+                            intense={feedback.type === 'error'}
+                        />
+                    </motion.h3>
+                    <p className="text-xl font-mono max-w-md">{feedback.message}</p>
                 </motion.div>
             ) : (
-                <div className="flex-1 flex flex-col justify-center space-y-8">
-                    <div className="p-6 border-l-4 border-cyber-blue bg-deep-black/30">
-                        <p className="font-mono text-xl">{currentQ.question}</p>
-                    </div>
+                <div className="flex-1 flex flex-col justify-center space-y-6">
+                    <motion.div
+                        key={currentQ.id}
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="bg-deep-black/80 border-l-4 border-cyber-blue p-6"
+                    >
+                        <div className="text-xs text-cyber-blue mb-2 uppercase tracking-wider">
+                            {`// SECURITY_CHECK: ${currentQ.type.toUpperCase()}`}
+                        </div>
+                        <p className="font-mono text-lg md:text-xl leading-relaxed text-white">
+                            {currentQ.question}
+                        </p>
+                    </motion.div>
 
                     <div className="grid gap-3">
-                        {currentQ.options.map((opt, idx) => (
-                            <button
+                        {shuffledOptions.map((opt, idx) => (
+                            <motion.button
                                 key={idx}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.1 }}
                                 onClick={() => handleAnswer(opt)}
-                                className="p-4 border border-zinc-800 hover:border-cyber-blue hover:bg-cyber-blue/10 text-left transition-all"
+                                className="group border border-cyber-blue/40 p-4 text-left hover:border-cyber-blue hover:bg-cyber-blue/5 transition-all"
                             >
-                                <span className="text-cyber-blue mr-2">{`>>`}</span>
-                                {opt.label}
-                            </button>
+                                <span className="text-cyber-blue mr-3 font-mono">{`>>`}</span>
+                                <span className="group-hover:text-cyber-blue transition-colors">{opt.label}</span>
+                            </motion.button>
                         ))}
                     </div>
                 </div>

@@ -40,6 +40,7 @@ src/
 │   ├── useTypewriter.js # Hook para efeito de escrita automática
 │   └── useDeviceData.js # Hook para extrair bateria, OS, user agent (O Susto Real)
 ├── pages/
+│   ├── Register.jsx     # Página inicial de registo (com aviso de dados fictícios)
 │   ├── Intro.jsx        # A Calibração
 │   ├── Act1.jsx         # Engenharia Social
 │   ├── Act2.jsx         # Invasão

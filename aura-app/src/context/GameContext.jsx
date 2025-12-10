@@ -8,7 +8,7 @@ const GameContext = createContext();
 export const GameProvider = ({ children }) => {
     const [currentStage, setCurrentStage] = useState(() => {
         const saved = loadProgress();
-        return saved?.currentStage || 'intro';
+        return saved?.currentStage || 'register';
     });
     const [securityScore, setSecurityScore] = useState(() => {
         const saved = loadProgress();
@@ -35,7 +35,7 @@ export const GameProvider = ({ children }) => {
 
     const resetGame = () => {
         clearSession();
-        setCurrentStage('intro');
+        setCurrentStage('register');
         setSecurityScore(100);
         setLeakedData([]);
     };
